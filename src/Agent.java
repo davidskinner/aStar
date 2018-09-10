@@ -6,15 +6,8 @@ import java.util.*;
 class MS {
 	float x;
 	float y;
-
-	float f;
-	float g;
-	float h;
 	public float cost;
 	MS parent;
-	ArrayList<MS> neighbors = null;
-
-
 
 	MS()
 	{}
@@ -34,6 +27,7 @@ class MS {
 		this.x = x;
 		this.y = y;
 	}
+
 	MS(float c, float x, float y, MS par)
 	{
 		this.cost = c;
@@ -55,21 +49,31 @@ class MS {
 
 	boolean isEqual(MS checkIf)
 	{
-		return (int) this.x == (int) checkIf.x && (int) this.y == (int) checkIf.y;
+		return Math.round((this.x/10.0)*10) == Math.round((checkIf.x/10.0)*10) && Math.round((this.y/10)*10) == Math.round((checkIf.y/10)*10);
 	}
 
-	LinkedList<MS> getPath()
+	LinkedList<MS> getPath(MS finalState)
 	{
 		LinkedList<MS> temp = new LinkedList<>();
-		Iterator x = temp.descendingIterator();
-
-		temp.add(this);
-		while(x.hasNext())
+		temp.add(finalState);
+		while(finalState.parent != null)
 		{
-			MS element = (MS)x.next();
-			temp.add(element);
+//            System.out.println(currentLevel.printState());
+			finalState= finalState.parent;
+			temp.add(finalState);
+
 		}
+
 		return temp;
+
+//		Iterator x = temp.descendingIterator();
+
+//		while(x.hasNext())
+//		{
+//			MS element = (MS)x.next();
+////			System.out.println(element.printState());
+//
+//		}
 
 	}
 }
@@ -108,51 +112,76 @@ class StateComparator implements Comparator<MS> {
 		return (float)Math.sqrt((a.x - goal.x) * (a.x - goal.x) + (a.y - goal.y) * (a.y - goal.y));
 	}
 
-	public MS search(MS startState, MS goalState, Model m) {
+	public MS UCS(MS startState, MS goalState, Model m) {
 
 		CostComparator costComparator = new CostComparator();
 		StateComparator stateComparator = new StateComparator();
 
-		TreeSet<MS> todo = new TreeSet<>(costComparator); //FIFO counter
-		TreeSet<MS> seenIt= new TreeSet<>(stateComparator);
+		TreeSet<MS> frontier = new TreeSet<>(costComparator); //FIFO counter
+		TreeSet<MS> beenthere= new TreeSet<>(stateComparator);
 		startState.cost = 0.0f;
 		startState.parent = null;
 
 		//close set
-		seenIt.add(startState);
+		beenthere.add(startState);
 
 		//open set
-		todo.add(startState);
+		frontier.add(startState);
 
-		while(!todo.isEmpty()) {
+		MS s = new MS();
+		MS oldchild;
 
-			MS currentState = new MS();
-			currentState = todo.pollFirst(); // get lowest-cost state
+		while(!frontier.isEmpty()) {
 
-			if(currentState.isEqual(goalState))
-				 return currentState; // this is the final state
 
-				ArrayList<MS> action = GenerateNeighbors(currentState,goalState,m);
+			s = frontier.pollFirst(); // get lowest-cost state
 
-				MS oldchild = new MS();
+			float x = Math.round((s.x/10.0))*10;
+			float y = Math.round((s.y/10.0))*10;
+			float gx = Math.round((goalState.x/10.0))*10;
+			float gy = Math.round((goalState.y/10.0))*10;
+
+			boolean same;
+			if(x == gx && y == gy)
+			{
+				same = true;
+			}
+			else
+			{
+				same = false;
+			}
+
+
+			if(same)
+				 return s; // this is the final state
+
+//			beenthere.add(s);
+
+				ArrayList<MS> action = GenerateNeighbors(s,goalState,m);
+
 			for (MS a : action) {
 
-				if(seenIt.contains(a))
+//				float acost = 1/m.getTravelSpeed(a.x,a.y);
+
+
+				if(beenthere.contains(a))
 				{
-//					float tempG = eDistance(a,goalState) + m.getTravelSpeed(a.x,a.y);
-					oldchild = seenIt.floor(a);
-					if(currentState.cost + a.cost< oldchild.cost)
+					oldchild = beenthere.floor(a);
+					oldchild.cost = 1/m.getTravelSpeed(oldchild.x, oldchild.y) + eDistance(oldchild,goalState);
+//					oldchild.cost = 1/m.getTravelSpeed(oldchild.x,oldchild.y);
+					if(a.cost < oldchild.cost)
 					{
-						oldchild.cost = currentState.cost + a.cost;
-						oldchild.parent = currentState;
+						oldchild.cost =  a.cost;
+						oldchild.parent = s;
 					}
 				}
 				else
 				{
-					a.cost = currentState.cost + a.cost;
-					a.parent = currentState;
-					todo.add(a);
-					seenIt.add(a);
+					//when beenthere doesn't have the child in it
+					a.cost = 1/m.getTravelSpeed(a.x,a.y) + eDistance(a,goalState);
+					a.parent = s;
+					frontier.add(a);
+					beenthere.add(a);
 				}
 			}
 		}
@@ -179,9 +208,8 @@ class StateComparator implements Comparator<MS> {
 
 			if(temp.x < Model.XMAX && temp.y < Model.YMAX  && temp.x > 0 && temp.y > 0)
 			{
-				temp.cost = 1/m.getTravelSpeed(temp.x,temp.y);
+				tempList.add(temp);
 			}
-			tempList.add(temp);
 
 			if(i == 1)
 			{
@@ -221,28 +249,31 @@ class Agent {
 			MouseEvent e = c.nextMouseEvent();
 			if(e == null)
 				break;
+			//this sets the destination of the can. It modifies x and y destination values to the clicked place
 			m.setDestination(e.getX(), e.getY());
 		}
 
 		MS goalState = new MS(m.getDestinationX(), m.getDestinationY());
 
 		MyPlanner planner = new MyPlanner();
-		MS finalState = planner.search(startState, goalState, m);
-		LinkedList<MS> path = finalState.getPath();
+		MS finalState = planner.UCS(startState, goalState, m);
+		LinkedList<MS> path = finalState.getPath(finalState);
 
-		for (MS p :
-				path) {
-			log(p.x+ " "+ p.y);
-		}
-if(path.size() > 1)
+		log(String.valueOf(path.size()));
+		log(String.valueOf(goalState.x + " " + goalState.y));
+
+
+		//set destination to next one in path
+if(path.size() == 1)
 {
-	m.getSprites().get(0).xDestination= path.get(1).x;
-	m.getSprites().get(0).yDestination = path.get(1).y;
+	//if there is only the current one in the path stay still
+	m.setDestination(path.get(0).x, path.get(0).y);
+
 }
 else
 {
-	m.getSprites().get(0).xDestination= path.get(0).x;
-	m.getSprites().get(0).yDestination = path.get(0).y;
+	//move to the next in path
+	m.setDestination(path.get(1).x, path.get(1).y);
 }
 
 		//draw the line from the path from finalState to startState
@@ -256,7 +287,7 @@ else
 
 	public static void log(String x)
 	{
-		System.out.println(x);
+//		System.out.println(x);
 	}
 
 	public static void main(String[] args) throws Exception
@@ -265,3 +296,7 @@ else
 		Controller.playGame();
 	}
 }
+
+
+
+
