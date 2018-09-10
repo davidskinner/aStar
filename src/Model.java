@@ -65,9 +65,9 @@ class Model {
 		s.yDestination = y;
 	}
 
-	double getDistanceToDestination(int sprite) {
+	float getDistanceToDestination(int sprite) {
 		Sprite s = sprites.get(sprite);
-		return Math.sqrt((s.x - s.xDestination) * (s.x - s.xDestination) + (s.y - s.yDestination) * (s.y - s.yDestination));
+		return (float)Math.sqrt((s.x - s.xDestination) * (s.x - s.xDestination) + (s.y - s.yDestination) * (s.y - s.yDestination));
 	}
 
 	class Sprite {
