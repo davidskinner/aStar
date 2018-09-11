@@ -87,7 +87,6 @@ class CostComparator implements Comparator<MS> {
 				return -1;
 			else if(a.cost > b.cost )
 				return 1;
-
 		return 0;
 	}
 }
@@ -108,21 +107,13 @@ class StateComparator implements Comparator<MS> {
 	}
 }
 
-
  class MyPlanner {
 
 	TreeSet<MS> frontier;
 
-	float heuristic(MS a, MS goal)
-	{
-		return (float)Math.sqrt((a.x - goal.x) * (a.x - goal.x) + (a.y - goal.y) * (a.y - goal.y));
-	}
-
 	 public MS ASTAR(MS startState, MS goalState, Model m) {
 
-
-
-				 CostComparator costComparator = new CostComparator();
+		 CostComparator costComparator = new CostComparator();
 		 StateComparator stateComparator = new StateComparator();
 
 		 frontier = new TreeSet<>(costComparator); //FIFO counter
@@ -143,9 +134,6 @@ class StateComparator implements Comparator<MS> {
 		 MS oldchild;
 
 		 while(!frontier.isEmpty()) {
-
-
-
 			 s = frontier.pollFirst(); // get lowest-cost state
 
 			 float x = Math.round((s.x/10.0))*10;
@@ -162,16 +150,13 @@ class StateComparator implements Comparator<MS> {
 			 {
 				 same = false;
 			 }
-
 			 if(same)
 				 return s; // this is the final state
-
-
 			 ArrayList<MS> children = generateChildren(s,goalState,m);
+
 			 float heuristic = 1/m.getTravelSpeed(100,100) * m.getDistanceToDestination(0);
 
 			 for (MS child : children) {
-
 				 float acost = 1/m.getTravelSpeed(child.x,child.y) + heuristic;
 				 if(beenthere.contains(child))
 				 {
@@ -194,7 +179,6 @@ class StateComparator implements Comparator<MS> {
 			 }
 		 }
 		 throw new RuntimeException("There is no path to the goal");
-
 	 }
 
 	public MS UCS(MS startState, MS goalState, Model m) {
@@ -240,12 +224,10 @@ class StateComparator implements Comparator<MS> {
 
 			if(same)
 				 return s; // this is the final state
-
-
 				ArrayList<MS> children = generateChildren(s,goalState,m);
 
 			for (MS child : children) {
-
+				
 				float acost = 1/m.getTravelSpeed(child.x,child.y);
 				if(beenthere.contains(child))
 				{
@@ -263,15 +245,10 @@ class StateComparator implements Comparator<MS> {
 					frontier.add(child);
 					beenthere.add(child);
 				}
-
-
 			}
 		}
 		throw new RuntimeException("There is no path to the goal");
-
 	}
-
-
 
 	ArrayList<MS> generateChildren(MS currentState, MS goalState, Model m)
 	{
@@ -304,7 +281,6 @@ class StateComparator implements Comparator<MS> {
 		A[7][0] = -10;
 		A[7][1] = 10;
 
-
 		for (int i = 0; i < 8; i++) {
 			MS temp = new MS(currentState);
 
@@ -329,7 +305,7 @@ class StateComparator implements Comparator<MS> {
 
 class Agent {
 
-	MyPlanner planner = new MyPlanner();
+	MyPlanner myplanner = new MyPlanner();
 	LinkedList<MS> path = new LinkedList<>();
 	MS goalState = new MS();
 	boolean ucs;
@@ -342,10 +318,10 @@ class Agent {
 		}
 
 		g.setColor(Color.red);
-		while(!planner.frontier.isEmpty())
+		while(!myplanner.frontier.isEmpty())
 		{
 			MS temp;
-			temp = planner.frontier.pollFirst();
+			temp = myplanner.frontier.pollFirst();
 			g.fillOval((int)temp.x,(int)temp.y,10,10);
 		}
 	}
@@ -383,17 +359,17 @@ class Agent {
 		}
 
 		goalState = new MS(x,y);
-		planner = new MyPlanner();
+		myplanner = new MyPlanner();
 
 		MS finalState;
 		if(ucs)
 		{
-			finalState = planner.UCS(startState, goalState, m);
+			finalState = myplanner.UCS(startState, goalState, m);
 
 		}
 		else
 		{
-			finalState = planner.ASTAR(startState, goalState, m);
+			finalState = myplanner.ASTAR(startState, goalState, m);
 		}
 
 
