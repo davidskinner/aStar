@@ -1,3 +1,5 @@
+import javafx.scene.input.MouseButton;
+
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.*;
@@ -58,22 +60,21 @@ class MS {
 		temp.add(finalState);
 		while(finalState.parent != null)
 		{
-//            System.out.println(currentLevel.printState());
 			finalState= finalState.parent;
 			temp.add(finalState);
-
 		}
 
-		return temp;
+		Iterator x = temp.descendingIterator();
 
-//		Iterator x = temp.descendingIterator();
+		LinkedList<MS> temps = new LinkedList<>();
 
-//		while(x.hasNext())
-//		{
-//			MS element = (MS)x.next();
-////			System.out.println(element.printState());
-//
-//		}
+		while(x.hasNext())
+		{
+			MS element = (MS)x.next();
+			temps.add(element);
+		}
+
+		return temps;
 
 	}
 }
@@ -92,14 +93,17 @@ class CostComparator implements Comparator<MS> {
 }
 
 class StateComparator implements Comparator<MS> {
-
 	public int compare(MS a, MS b)
 	{
-		if(a.x < b.x || a.y < b.y)
-			return -1;
-		else if(a.x > b.x || a.y > b.y)
-			return 1;
-		return 0;
+		if(a.x <b.x)
+		return -1;
+	else if(a.x > b.x)
+		return 1;
+	else if(a.y <b.y)
+		return -1;
+	else if(a.y > b.y)
+		return 1;
+	return 0;
 
 	}
 }
@@ -107,17 +111,98 @@ class StateComparator implements Comparator<MS> {
 
  class MyPlanner {
 
+	TreeSet<MS> frontier;
+
 	float heuristic(MS a, MS goal)
 	{
 		return (float)Math.sqrt((a.x - goal.x) * (a.x - goal.x) + (a.y - goal.y) * (a.y - goal.y));
 	}
+
+	 public MS ASTAR(MS startState, MS goalState, Model m) {
+
+
+
+				 CostComparator costComparator = new CostComparator();
+		 StateComparator stateComparator = new StateComparator();
+
+		 frontier = new TreeSet<>(costComparator); //FIFO counter
+		 TreeSet<MS> beenthere= new TreeSet<>(stateComparator);
+		 startState.cost = 0.0f;
+		 startState.parent = null;
+
+		 //close set
+		 beenthere.add(startState);
+
+		 //open set
+		 frontier.add(startState);
+
+		 beenthere.add(startState);
+		 frontier.add(startState);
+
+		 MS s = new MS();
+		 MS oldchild;
+
+		 while(!frontier.isEmpty()) {
+
+
+
+			 s = frontier.pollFirst(); // get lowest-cost state
+
+			 float x = Math.round((s.x/10.0))*10;
+			 float y = Math.round((s.y/10.0))*10;
+			 float gx = Math.round((goalState.x/10.0))*10;
+			 float gy = Math.round((goalState.y/10.0))*10;
+
+			 boolean same;
+			 if(x == gx && y == gy)
+			 {
+				 same = true;
+			 }
+			 else
+			 {
+				 same = false;
+			 }
+
+			 if(same)
+				 return s; // this is the final state
+
+
+			 ArrayList<MS> children = generateChildren(s,goalState,m);
+			 float heuristic = 1/m.getTravelSpeed(100,100) * m.getDistanceToDestination(0);
+
+			 for (MS child : children) {
+
+				 float acost = 1/m.getTravelSpeed(child.x,child.y) + heuristic;
+				 if(beenthere.contains(child))
+				 {
+					 oldchild = beenthere.floor(child);
+					 if(s.cost + acost < oldchild.cost)
+					 {
+						 oldchild.cost = s.cost + acost;
+						 oldchild.parent = s;
+					 }
+				 }
+				 else
+				 {
+					 child.cost = s.cost + acost;
+					 child.parent = s;
+					 frontier.add(child);
+					 beenthere.add(child);
+				 }
+
+
+			 }
+		 }
+		 throw new RuntimeException("There is no path to the goal");
+
+	 }
 
 	public MS UCS(MS startState, MS goalState, Model m) {
 
 		CostComparator costComparator = new CostComparator();
 		StateComparator stateComparator = new StateComparator();
 
-		TreeSet<MS> frontier = new TreeSet<>(costComparator); //FIFO counter
+		frontier = new TreeSet<>(costComparator); //FIFO counter
 		TreeSet<MS> beenthere= new TreeSet<>(stateComparator);
 		startState.cost = 0.0f;
 		startState.parent = null;
@@ -128,11 +213,13 @@ class StateComparator implements Comparator<MS> {
 		//open set
 		frontier.add(startState);
 
+		beenthere.add(startState);
+		frontier.add(startState);
+
 		MS s = new MS();
 		MS oldchild;
 
 		while(!frontier.isEmpty()) {
-
 
 			s = frontier.pollFirst(); // get lowest-cost state
 
@@ -151,90 +238,120 @@ class StateComparator implements Comparator<MS> {
 				same = false;
 			}
 
-
 			if(same)
 				 return s; // this is the final state
 
-//			beenthere.add(s);
 
-				ArrayList<MS> action = GenerateNeighbors(s,goalState,m);
+				ArrayList<MS> children = generateChildren(s,goalState,m);
 
-			for (MS a : action) {
+			for (MS child : children) {
 
-//				float acost = 1/m.getTravelSpeed(a.x,a.y);
-
-
-				if(beenthere.contains(a))
+				float acost = 1/m.getTravelSpeed(child.x,child.y);
+				if(beenthere.contains(child))
 				{
-					oldchild = beenthere.floor(a);
-					oldchild.cost = 1/m.getTravelSpeed(oldchild.x, oldchild.y) + eDistance(oldchild,goalState);
-//					oldchild.cost = 1/m.getTravelSpeed(oldchild.x,oldchild.y);
-					if(a.cost < oldchild.cost)
+					oldchild = beenthere.floor(child);
+					if(s.cost + acost < oldchild.cost)
 					{
-						oldchild.cost =  a.cost;
+						oldchild.cost = s.cost + acost;
 						oldchild.parent = s;
 					}
 				}
 				else
 				{
-					//when beenthere doesn't have the child in it
-					a.cost = 1/m.getTravelSpeed(a.x,a.y) + eDistance(a,goalState);
-					a.parent = s;
-					frontier.add(a);
-					beenthere.add(a);
+					child.cost = s.cost + acost;
+					child.parent = s;
+					frontier.add(child);
+					beenthere.add(child);
 				}
+
+
 			}
 		}
 		throw new RuntimeException("There is no path to the goal");
+
 	}
 
-	ArrayList<MS> GenerateNeighbors(MS currentState, MS goalState, Model m)
+
+
+	ArrayList<MS> generateChildren(MS currentState, MS goalState, Model m)
 	{
 
 		ArrayList<MS> tempList = new ArrayList<>();
-		int toggle = 10;
 
-		for (int i = 0; i < 4; i++) {
+		int[][] A;
+		A = new int[8][2];
+		A[0][0] = 0;
+		A[0][1] = 10;
+
+		A[1][0] = 10;
+		A[1][1] = 10;
+
+		A[2][0] = 10;
+		A[2][1] = 0;
+
+		A[3][0] = 10;
+		A[3][1] = -10;
+
+		A[4][0] = 0;
+		A[4][1] = -10;
+
+		A[5][0] = -10;
+		A[5][1] = -10;
+
+		A[6][0] = -10;
+		A[6][1] = 0;
+
+		A[7][0] = -10;
+		A[7][1] = 10;
+
+
+		for (int i = 0; i < 8; i++) {
 			MS temp = new MS(currentState);
 
-			if(i%2 == 0)
-			{
-				temp.x += toggle;
-			}
-			else
-			{
-				temp.y += toggle;
-			}
+				temp.x += A[i][0];
+				temp.y += A[i][1];
 
-			if(temp.x < Model.XMAX && temp.y < Model.YMAX  && temp.x > 0 && temp.y > 0)
-			{
-				tempList.add(temp);
-			}
-
-			if(i == 1)
-			{
-				toggle *= -1;
-			}
+				if(temp.x < Model.XMAX && temp.y < Model.YMAX  && temp.x > 0 && temp.y > 0)
+				{
+					tempList.add(temp);
+				}
 		}
-
 		return tempList;
 	}
+
+
+
 	public static float eDistance(MS a, MS goal)
 	{
 		return (float)Math.sqrt((a.x - goal.x) * (a.x - goal.x) + (a.y - goal.y) * (a.y - goal.y));
-
 	}
-
 }
-
-
 
 class Agent {
 
+	MyPlanner planner = new MyPlanner();
+	LinkedList<MS> path = new LinkedList<>();
+	MS goalState = new MS();
+	boolean ucs;
+
+
 	void drawPlan(Graphics g, Model m) {
 		g.setColor(Color.red);
-		g.drawLine((int)m.getX(), (int)m.getY(), (int)m.getDestinationX(), (int)m.getDestinationY());
+		for (int i = 0; i <path.size()-1 ; i++) {
+			g.drawLine((int)path.get(i).x, (int) path.get(i).y, (int)path.get(i+1).x,(int)path.get(i+1).y);
+		}
+
+		g.setColor(Color.red);
+		while(!planner.frontier.isEmpty())
+		{
+			MS temp;
+			temp = planner.frontier.pollFirst();
+			g.fillOval((int)temp.x,(int)temp.y,10,10);
+		}
 	}
+	float x = 100;
+	float y = 100;
+
 
 	void update(Model m)
 	{
@@ -251,39 +368,54 @@ class Agent {
 				break;
 			//this sets the destination of the can. It modifies x and y destination values to the clicked place
 			m.setDestination(e.getX(), e.getY());
+
+			x = e.getX();
+			y = e.getY();
+
+			if (e.getButton() == MouseEvent.BUTTON1)
+			{
+				ucs = true;
+			}
+			else if( e.getButton() == MouseEvent.BUTTON3)
+			{
+				ucs = false;
+			}
 		}
 
-		MS goalState = new MS(m.getDestinationX(), m.getDestinationY());
+		goalState = new MS(x,y);
+		planner = new MyPlanner();
 
-		MyPlanner planner = new MyPlanner();
-		MS finalState = planner.UCS(startState, goalState, m);
-		LinkedList<MS> path = finalState.getPath(finalState);
+		MS finalState;
+		if(ucs)
+		{
+			finalState = planner.UCS(startState, goalState, m);
 
-		log(String.valueOf(path.size()));
+		}
+		else
+		{
+			finalState = planner.ASTAR(startState, goalState, m);
+		}
+
+
+		path = finalState.getPath(finalState);
+
+		log(String.valueOf(path.size() -1));
 		log(String.valueOf(goalState.x + " " + goalState.y));
 
 
 		//set destination to next one in path
-if(path.size() == 1)
-{
-	//if there is only the current one in the path stay still
-	m.setDestination(path.get(0).x, path.get(0).y);
+		if(path.size() == 1)
+		{
+			//if there is only the current one in the path stay still
+			m.setDestination(m.getDestinationX(), m.getDestinationY());
 
-}
-else
-{
-	//move to the next in path
-	m.setDestination(path.get(1).x, path.get(1).y);
-}
-
-		//draw the line from the path from finalState to startState
-
-		//f(n) = g(n) + h(n) where g is cost and h is heuristic
-
-	}
-
-
-
+		}
+		else
+		{
+			//move to the next in path
+			m.setDestination(path.get(1).x, path.get(1).y);
+		}
+		}
 
 	public static void log(String x)
 	{
