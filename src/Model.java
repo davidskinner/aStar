@@ -7,11 +7,10 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import javax.imageio.ImageIO;
 
-class Model {
+public class Model {
 	public static final float EPSILON = 0.0001f; // A small number
 	public static final float XMAX = 1200.0f - EPSILON; // The maximum horizontal screen position. (The minimum is 0.)
 	public static final float YMAX = 600.0f - EPSILON; // The maximum vertical screen position. (The minimum is 0.)
-
 	private Controller controller;
 	private byte[] terrain;
 	private ArrayList<Sprite> sprites;
@@ -41,7 +40,7 @@ class Model {
 
 	// 0 <= x < MAP_WIDTH.
 	// 0 <= y < MAP_HEIGHT.
-	float getTravelSpeed(float x, float y) {
+	public float getTravelSpeed(float x, float y) {
 			int xx = (int)(x * 0.1f);
 			int yy = (int)(y * 0.1f);
 			if(xx >= 60)

@@ -91,21 +91,61 @@ class CostComparator implements Comparator<MS> {
 	}
 }
 
-class StateComparator implements Comparator<MS> {
+
+class AstarComparator implements Comparator<MS> {
+
+	Model model;
+	MS goalState;
+	float lc;
+
+	AstarComparator(Model m, MS g)
+	{
+		model = m;
+		goalState = g;
+	}
+
+	public static float eDistance(MS a, MS goal)
+	{
+		return (float)Math.sqrt((a.x - goal.x) * (a.x - goal.x) + (a.y - goal.y) * (a.y - goal.y));
+
+	}
 	public int compare(MS a, MS b)
 	{
-		if(a.x <b.x)
+		this.lc = 1.0f/model.getTravelSpeed(285, 577);
+		if(a.cost + eDistance(a,goalState)*(lc)/10 < b.cost + eDistance(b,goalState)*(lc)/10)
+			return -1;
+		else if(a.cost + eDistance(a,goalState)*(lc)/10> b.cost + eDistance(b,goalState)*(lc)/10)
+			return 1;
+		return 0;
+	}
+}
+
+ 
+
+
+class StateComparator implements Comparator<MS> {
+
+	public int compare(MS a, MS b)
+	{
+		int ax = (int)(a.x/10);
+		int ay = (int)(a.y/10);
+		int bx = (int)(b.x/10);
+		int by = (int)(b.y/10);
+
+		if(ax < bx)
 		return -1;
-	else if(a.x > b.x)
+	else if(ax > bx)
 		return 1;
-	else if(a.y <b.y)
+	else if(ay < by)
 		return -1;
-	else if(a.y > b.y)
+	else if(ay > by)
 		return 1;
 	return 0;
 
 	}
 }
+
+
 
  class MyPlanner {
 
@@ -113,10 +153,11 @@ class StateComparator implements Comparator<MS> {
 
 	 public MS ASTAR(MS startState, MS goalState, Model m) {
 
-		 CostComparator costComparator = new CostComparator();
 		 StateComparator stateComparator = new StateComparator();
 
-		 frontier = new TreeSet<>(costComparator); //FIFO counter
+		 AstarComparator astarComparator = new AstarComparator(m, goalState);
+
+		 frontier = new TreeSet<>(astarComparator); //FIFO counter
 		 TreeSet<MS> beenthere= new TreeSet<>(stateComparator);
 		 startState.cost = 0.0f;
 		 startState.parent = null;
@@ -134,6 +175,7 @@ class StateComparator implements Comparator<MS> {
 		 MS oldchild;
 
 		 while(!frontier.isEmpty()) {
+
 			 s = frontier.pollFirst(); // get lowest-cost state
 
 			 float x = Math.round((s.x/10.0))*10;
@@ -150,14 +192,14 @@ class StateComparator implements Comparator<MS> {
 			 {
 				 same = false;
 			 }
+
 			 if(same)
 				 return s; // this is the final state
 			 ArrayList<MS> children = generateChildren(s,goalState,m);
 
-			 float heuristic = 1/m.getTravelSpeed(305,438) * m.getDistanceToDestination(0);
-
 			 for (MS child : children) {
-				 float acost = 1/m.getTravelSpeed(child.x,child.y) + heuristic;
+
+				 float acost = 1/m.getTravelSpeed(child.x,child.y);
 				 if(beenthere.contains(child))
 				 {
 					 oldchild = beenthere.floor(child);
@@ -174,12 +216,11 @@ class StateComparator implements Comparator<MS> {
 					 frontier.add(child);
 					 beenthere.add(child);
 				 }
-
-
 			 }
 		 }
 		 throw new RuntimeException("There is no path to the goal");
 	 }
+
 
 	public MS UCS(MS startState, MS goalState, Model m) {
 
@@ -350,25 +391,27 @@ class Agent {
 		}
 
 		goalState = new MS(x,y);
-		System.out.println(	x + "," + y);
+//		System.out.println(	x + "," + y);
 		myplanner = new MyPlanner();
 
 		MS finalState;
 		if(ucs)
 		{
+			//pass in comparator here
 			finalState = myplanner.UCS(startState, goalState, m);
 
 		}
 		else
 		{
+			//pass in comparator
 			finalState = myplanner.ASTAR(startState, goalState, m);
 		}
 
 
 		path = finalState.getPath(finalState);
 
-		log(String.valueOf(path.size() -1));
-		log(String.valueOf(goalState.x + " " + goalState.y));
+//		log(String.valueOf(path.size() -1));
+//		log(String.valueOf(goalState.x + " " + goalState.y));
 
 
 		//set destination to next one in path
