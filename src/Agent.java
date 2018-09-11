@@ -154,7 +154,7 @@ class StateComparator implements Comparator<MS> {
 				 return s; // this is the final state
 			 ArrayList<MS> children = generateChildren(s,goalState,m);
 
-			 float heuristic = 1/m.getTravelSpeed(100,100) * m.getDistanceToDestination(0);
+			 float heuristic = 1/m.getTravelSpeed(305,438) * m.getDistanceToDestination(0);
 
 			 for (MS child : children) {
 				 float acost = 1/m.getTravelSpeed(child.x,child.y) + heuristic;
@@ -294,13 +294,6 @@ class StateComparator implements Comparator<MS> {
 		}
 		return tempList;
 	}
-
-
-
-	public static float eDistance(MS a, MS goal)
-	{
-		return (float)Math.sqrt((a.x - goal.x) * (a.x - goal.x) + (a.y - goal.y) * (a.y - goal.y));
-	}
 }
 
 class Agent {
@@ -309,7 +302,6 @@ class Agent {
 	LinkedList<MS> path = new LinkedList<>();
 	MS goalState = new MS();
 	boolean ucs;
-
 
 	void drawPlan(Graphics g, Model m) {
 		g.setColor(Color.red);
@@ -327,7 +319,6 @@ class Agent {
 	}
 	float x = 100;
 	float y = 100;
-
 
 	void update(Model m)
 	{
@@ -359,6 +350,7 @@ class Agent {
 		}
 
 		goalState = new MS(x,y);
+		System.out.println(	x + "," + y);
 		myplanner = new MyPlanner();
 
 		MS finalState;
