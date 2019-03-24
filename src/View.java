@@ -18,7 +18,6 @@ public class View extends JFrame implements ActionListener {
 	Model model;
 	private MyPanel panel;
 	private ArrayList<Controller> replayPoints;
-	private int slomo;
 
 	public View(Controller c, Model m) throws Exception {
 		this.controller = c;
@@ -27,7 +26,7 @@ public class View extends JFrame implements ActionListener {
 		// Make the game window
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setTitle("Moving Robot");
-		this.setSize(1203, 636);
+		this.setSize(1200, 600);
 		this.panel = new MyPanel();
 		this.panel.addMouseListener(controller);
 		this.getContentPane().add(this.panel);
@@ -62,14 +61,16 @@ public class View extends JFrame implements ActionListener {
 					g.fillRect(10 * x, 10 * y, 10, 10);
 					posBlue += 4;
 				}
-				for(int x = 60; x < 120; x++) {
-					int bb = terrain[posRed + 1] & 0xff;
-					int gg = terrain[posRed + 2] & 0xff;
-					int rr = terrain[posRed + 3] & 0xff;
-					g.setColor(new Color(rr, gg, bb));
-					g.fillRect(10 * x, 10 * y, 10, 10);
-					posRed -= 4;
-				}
+
+				//draw the mirrored other half
+//				for(int x = 60; x < 120; x++) {
+//					int bb = terrain[posRed + 1] & 0xff;
+//					int gg = terrain[posRed + 2] & 0xff;
+//					int rr = terrain[posRed + 3] & 0xff;
+//					g.setColor(new Color(rr,gg,bb));
+//					g.fillRect(10 * x, 10 * y, 10, 10);
+//					posRed -= 4;
+//				}
 			}
 		}
 

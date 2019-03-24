@@ -21,9 +21,13 @@ public class Model {
 
 	void initGame() throws Exception {
 		BufferedImage bufferedImage = ImageIO.read(new File("terrain.png"));
-		if(bufferedImage.getWidth() != 60 || bufferedImage.getHeight() != 60)
-			throw new Exception("Expected the terrain image to have dimensions of 60-by-60");
+//		if(bufferedImage.getWidth() != 60 || bufferedImage.getHeight() != 60)
+//		{
+//			throw new Exception("Expected the terrain image to have dimensions of 60-by-60");
+//		}
+
 		terrain = ((DataBufferByte)bufferedImage.getRaster().getDataBuffer()).getData();
+
 		sprites = new ArrayList<Sprite>();
 		sprites.add(new Sprite(100, 100));
 	}

@@ -107,11 +107,11 @@ class AstarComparator implements Comparator<MS> {
 	public static float eDistance(MS a, MS goal)
 	{
 		return (float)Math.sqrt((a.x - goal.x) * (a.x - goal.x) + (a.y - goal.y) * (a.y - goal.y));
-
 	}
+
 	public int compare(MS a, MS b)
 	{
-		this.lc = 1.0f/model.getTravelSpeed(285, 577);
+		this.lc = 1.0f/model.getTravelSpeed(285, 577); // 285,577
 		if(a.cost + eDistance(a,goalState)*(lc)/10 < b.cost + eDistance(b,goalState)*(lc)/10)
 			return -1;
 		else if(a.cost + eDistance(a,goalState)*(lc)/10> b.cost + eDistance(b,goalState)*(lc)/10)
@@ -120,10 +120,8 @@ class AstarComparator implements Comparator<MS> {
 	}
 }
 
- 
-
-
-class StateComparator implements Comparator<MS> {
+class
+StateComparator implements Comparator<MS> {
 
 	public int compare(MS a, MS b)
 	{
@@ -409,11 +407,7 @@ class Agent {
 
 
 		path = finalState.getPath(finalState);
-
-//		log(String.valueOf(path.size() -1));
-//		log(String.valueOf(goalState.x + " " + goalState.y));
-
-
+		
 		//set destination to next one in path
 		if(path.size() == 1)
 		{
