@@ -26,13 +26,13 @@ public class View extends JFrame implements ActionListener {
 		// Make the game window
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setTitle("Moving Robot");
-		this.setSize(1200, 600);
+		this.setSize(600, 600);
 		this.panel = new MyPanel();
 		this.panel.addMouseListener(controller);
 		this.getContentPane().add(this.panel);
 		this.setVisible(true);
 
-		this.replayPoints = new ArrayList<Controller>();
+		this.replayPoints = new ArrayList<>();
 	}
 
 	public void actionPerformed(ActionEvent evt) {
@@ -74,15 +74,15 @@ public class View extends JFrame implements ActionListener {
 			}
 		}
 
-		void drawSprites(Graphics g) {
-			ArrayList<Model.Sprite> sprites = model.getSprites();
-			for(int i = 0; i < sprites.size(); i++) {
-
-				// Draw the robot image
-				Model.Sprite s = sprites.get(i);
-				g.drawImage(image_robot, (int)s.x - 12, (int)s.y - 32, null);
-			}
-		}
+//		void drawSprites(Graphics g) {
+//			ArrayList<Model.Sprite> sprites = model.getSprites();
+//			for(int i = 0; i < sprites.size(); i++) {
+//
+//				// Draw the robot image
+//				Model.Sprite s = sprites.get(i);
+//				g.drawImage(image_robot, (int)s.x - 12, (int)s.y - 32, null);
+//			}
+//		}
 
 		public void paintComponent(Graphics g) {
 
@@ -93,7 +93,7 @@ public class View extends JFrame implements ActionListener {
 
 			// Draw the view
 			drawTerrain(g);
-			drawSprites(g);
+//			drawSprites(g);
 			controller.agent.drawPlan(g, model);
 		}
 	}
