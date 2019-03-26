@@ -13,7 +13,6 @@ public class Model {
 	public static final float YMAX = 600.0f - EPSILON; // The maximum vertical screen position. (The minimum is 0.)
 	private Controller controller;
 	private byte[] terrain;
-//	private ArrayList<Sprite> sprites;
 
 	Model(Controller c) {
 		this.controller = c;
@@ -28,22 +27,16 @@ public class Model {
 
 		terrain = ((DataBufferByte)bufferedImage.getRaster().getDataBuffer()).getData();
 
-//		sprites = new ArrayList<>();
-//		sprites.add(new Sprite(100, 100));
+
 	}
 
 	// These methods are used internally. They are not useful to the agents.
 	byte[] getTerrain() { return this.terrain; }
-//	ArrayList<Sprite> getSprites() { return this.sprites; }
 
 	void update() {
-		// Update the agents
-//		for(int i = 0; i < sprites.size(); i++)
-//			sprites.get(i).update();
+
 	}
 
-	// 0 <= x < MAP_WIDTH.
-	// 0 <= y < MAP_HEIGHT.
 	public float getTravelSpeed(float x, float y) {
 			int xx = (int)(x * 0.1f);
 			int yy = (int)(y * 0.1f);
@@ -57,10 +50,6 @@ public class Model {
 	}
 
 	Controller getController() { return controller; }
-//	float getX() { return sprites.get(0).x; }
-//	float getY() { return sprites.get(0).y; }
-//	float getDestinationX() { return sprites.get(0).xDestination; }
-//	float getDestinationY() { return sprites.get(0).yDestination; }
 
 	void setDestination(float x, float y) {
 //		Sprite s = sprites.get(0);

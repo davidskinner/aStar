@@ -5,8 +5,8 @@ import java.util.*;
 
 class MyState
 {
-	float x;
-	float y;
+	float x = 200;
+	float y = 200;
 	public float cost;
 	MyState parent;
 
@@ -29,28 +29,12 @@ class MyState
 		this.y = y;
 	}
 
-	MyState(float c, float x, float y, MyState par)
+	MyState(float cost, MyState par)
 	{
-		this.cost = c;
-		this.x = x;
-		this.y = y;
 		MyState temp;
-		temp = par;
-		this.parent = temp;
-	}
-
-	MyState(float cost, MyState par) {
-
-		MyState temp = new MyState();
 		this.cost = cost;
 		temp = par;
 		this.parent = temp;
-
-	}
-
-	boolean isEqual(MyState checkIf)
-	{
-		return Math.round((this.x/10.0)*10) == Math.round((checkIf.x/10.0)*10) && Math.round((this.y/10)*10) == Math.round((checkIf.y/10)*10);
 	}
 
 	LinkedList<MyState> getPath(MyState finalState)
@@ -192,6 +176,7 @@ StateComparator implements Comparator<MyState> {
 
 			 if(same)
 				 return s; // this is the final state
+
 			 ArrayList<MyState> children = generateChildren(s,goalState,m);
 
 			 for (MyState child : children) {
@@ -319,7 +304,7 @@ class Agent {
 		}
 
 		goalState = new MyState(x,y);
-//		System.out.println(	x + "," + y);
+		System.out.println(	x + "," + y);
 		myplanner = new MyPlanner();
 
 		MyState finalState;
@@ -350,10 +335,14 @@ class Agent {
 //		System.out.println(x);
 	}
 
+	public static int GetIntFromString(String s)
+	{
+		return Integer.valueOf(s);
+	}
+
 	public static void main(String[] args) throws Exception
 	{
-
-		Controller.playGame();
+		Controller.playGame(GetIntFromString(args[0]),GetIntFromString(args[1]),GetIntFromString(args[2]),GetIntFromString(args[3]));
 	}
 }
 

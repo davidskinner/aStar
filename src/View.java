@@ -74,16 +74,6 @@ public class View extends JFrame implements ActionListener {
 			}
 		}
 
-//		void drawSprites(Graphics g) {
-//			ArrayList<Model.Sprite> sprites = model.getSprites();
-//			for(int i = 0; i < sprites.size(); i++) {
-//
-//				// Draw the robot image
-//				Model.Sprite s = sprites.get(i);
-//				g.drawImage(image_robot, (int)s.x - 12, (int)s.y - 32, null);
-//			}
-//		}
-
 		public void paintComponent(Graphics g) {
 
 			// Give the agents a chance to make decisions

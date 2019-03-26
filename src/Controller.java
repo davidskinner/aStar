@@ -21,7 +21,7 @@ class Controller implements MouseListener
 
 	Controller() {
 		this.agent = new Agent();
-		this.mouseEvents = new LinkedList<MouseEvent>();
+		this.mouseEvents = new LinkedList<>();
 	}
 
 	private void init() throws Exception {
@@ -56,7 +56,7 @@ class Controller implements MouseListener
 	public void mouseExited(MouseEvent e) {    }
 	public void mouseClicked(MouseEvent e) {    }
 
-	static void playGame() throws Exception {
+	static void playGame(int x, int y, int xx, int yy) throws Exception {
 		Controller c = new Controller();
 		c.init();
 		c.view = new View(c, c.model); // instantiates a JFrame, which spawns another thread to pump events and keeps the whole program running until the JFrame is closed
